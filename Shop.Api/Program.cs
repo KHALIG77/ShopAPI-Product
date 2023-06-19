@@ -1,0 +1,42 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+using Shop.Api.DTOs.BrandDTOs;
+using Shop.Core.Repositories;
+using Shop.Data;
+using Shop.Data.Repositories;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<ShopDbContext>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+});
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<BrandPostDTOValidation>();
+builder.Services.AddFluentValidationRulesToSwagger();
+builder.Services.AddScoped<IBrandRepository,BrandRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
